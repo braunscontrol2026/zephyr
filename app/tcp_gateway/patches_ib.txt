@@ -1,0 +1,4 @@
+modbus_serial.c:56  +    uint8_t c;
+modbus_serial.c:62  +    	while (uart_fifo_read(cfg->dev, &c, 1));   /* XXX patch IB 28.08.25 */
+uart_sam0.c:850     -       return regs->INTFLAG.bit.RXC != 0;
+                    +       return (regs->INTFLAG.bit.RXC != 0) && (regs->INTENSET.bit.RXC != 0);

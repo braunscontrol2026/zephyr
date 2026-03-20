@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html><body>
+<table class="fixed" border="0">
+	<col width="500px" />
+	<tr>
+		<td>
+			<h2>BCR Fernbedienung</h2>
+			<table border="0">
+				<tr>
+					<td><label for="ba">Busadresse</label></td>
+					<td><input id="ba" type="number" min="0" max="255"
+						name="Busadresse" style="width: 20%;" value="0" oninput="send_ba()"><input type="checkbox" id="refresh"
+							name="refresh" value="yes" checked> Refresh
+					</label></td>
+				</tr>
+				<tr>
+					<td><label for="line0">Zeile 1</label></td>
+					<td><svg width="360" height="30">
+                    <rect width="360" height="30"
+								style="fill:rgb(0,255,0);stroke-width:1;stroke:rgb(0,127,0)" />
+                    <text id="line1" x="5" y="24"
+								style="font-size:24px;font-family:monospace;stroke-width:0.3;fill:#806600">1234567890</text>
+                    Sorry, your browser does not support inline SVG.  
+                    </svg></td>
+				</tr>
+				<tr>
+					<td><label for="line1">Zeile 2</label></td>
+					<td><svg width="360" height="30">
+                    <rect width="360" height="30"
+								style="fill:rgb(0,255,0);stroke-width:1;stroke:rgb(0,127,0)" />
+                    <text id="line2" x="5" y="24"
+								style="font-size:24px;font-family:monospace;stroke-width:0.3;fill:#806600">1234567890</text>
+                    Sorry, your browser does not support inline SVG.  
+                    </svg></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<button id="left" type="button" style="width: 15%;"
+							onclick="send_tast(0x01)">le</button>
+						<button id="up" type="button" style="width: 15%;"
+							onclick="send_tast(0x02)">up</button>
+						<button id="down" type="button" style="width: 15%;"
+							onclick="send_tast(0x04)">dn</button>
+						<button id="right" type="button" style="width: 15%;"
+							onclick="send_tast(0x08)">ri</button>
+						<button id="ud" type="button" style="width: 15%;"
+							onclick="send_tast(0x06)">ud</button>
+						<button id="lr" type="button" style="width: 15%;"
+							onclick="send_tast(0x09)">lr</button>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+<script>
+
+	setTimeout(refreshLCD, 250);
+	
+	upStreamDataObj = {clientData:{scancode:0}};
+	
+	function send_tast(scode) {
+		upStreamDataObj.clientData.scancode = scode;
+		console.log(upStreamDataObj);
+	}
+
+	function send_ba() {
+		upStreamDataObj.clientData.ba = parseInt(document.getElementById("ba").value);
+		console.log(upStreamDataObj);
+	}
+	
+	function send_updata() {
+		let s = JSON.stringify(upStreamDataObj);
+		upStreamDataObj.clientData.scancode = 0;
+		return s;
+	}
+
+	function loadJSON(url, cFunction) {
+		const xhttp = new XMLHttpRequest();
+		url = url + "?data=" + send_updata();
+		xhttp.onload = function() {
+			cFunction(this);
+		}
+		xhttp.open("GET", url, true);
+		xhttp.setRequestHeader("Content-Type", "application/json");
+		xhttp.send();
+	}
+
+	function getJSON(xhttp) {
+		if (xhttp.readyState === 4 && xhttp.status === 200) {
+			const obj = JSON.parse(xhttp.responseText);
+			document.getElementById("line1").innerHTML = obj.client.line1;
+			document.getElementById("line2").innerHTML = obj.client.line2;
+			if (obj.client.hasOwnProperty("busaddress")) {
+				document.getElementById("ba").value = obj.client.busaddress;
+			}
+		}
+	}
+
+	function refreshLCD() {
+		const cb = document.querySelector('#refresh');
+		if (cb.checked) {
+			loadJSON("fernb.json", getJSON);
+		}
+		setTimeout(refreshLCD, 250);
+	}
+</script>
+</body></html>

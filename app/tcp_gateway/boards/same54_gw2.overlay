@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2020 Phytec Messtechnik GmbH
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+&sercom2 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <19200>;
+	rxpo = <1>;
+	txpo = <0>;
+
+	pinctrl-0 = <&sercom2_uart_default>;
+	pinctrl-names = "default";
+
+	modbus0 {
+		compatible = "zephyr,modbus-serial";
+		status = "okay";
+		de-gpios = <&portb 28 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+
+&sram0 {
+	reg = <0x20000000 0x30000>;
+};
+
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/*
+		 * Forth partition last 128 kB - storage_partition
+		 */
+		forth_partition: partition@e0000 {
+			label = "forth-dict";
+			reg = <0x00e0000 0x0001c000>;
+		};
+
+		 /*
+		 * The final 16 KiB is reserved for the application.
+		 * Storage partition will be used by FCB/LittleFS/NVS
+		 * if enabled.
+		 */
+		chip_partition: partition@fc000 {
+			label = "eeprom";
+			reg = <0x000fc000 0x00004000>;
+		};
+	};
+};
+
+/ {
+	aliases {
+		mac-eeprom = &eeprom0;
+	};
+
+	eeprom0: eeprom-0 {
+		compatible = "zephyr,emu-eeprom";
+		status = "okay";
+		partition = < &chip_partition >;
+		size = <64>;
+		pagesize = <(16*512)>;
+	};
+};
+

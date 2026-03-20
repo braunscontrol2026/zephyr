@@ -1,0 +1,62 @@
+# Copyright 2023 NXP
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Atmel SAM0 Quad Serial Peripheral Interface (QSPI) Controller for Brauns Control.
+
+  QSPI acts as an interface to up to two serial flash memory devices, each with
+  up to eight bidirectional bidirectional data lines, depending on the platform.
+
+compatible: "bc,sam0-qspiram"
+
+include:
+  - name: base.yaml
+  - name: pinctrl-device.yaml
+  - name: atmel,assigned-clocks.yaml
+
+bus: qspi
+
+properties:
+  reg:
+    required: true
+
+  interrupts:
+    required: true
+
+  pinctrl-0:
+    required: true
+
+  pinctrl-names:
+    required: true
+
+  clocks:
+    required: true
+
+  clock-names:
+    required: true
+
+  atmel,assigned-clocks:
+    required: true
+
+  atmel,assigned-clock-names:
+    required: true
+
+  frequency:
+    type: int
+    required: true
+
+  disk-start:
+    type: int
+    required: false
+
+  sector-size:
+    type: int
+    required: false
+
+  sector-count:
+    type: int
+    required: false
+
+  disk-name:
+    type: string
+    required: false

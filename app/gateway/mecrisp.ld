@@ -1,0 +1,5 @@
+MEMORY
+    {
+    EFLASH (rx) : ORIGIN = 0x00e0000, LENGTH = 0x0001c000
+    ERAM (wx) : ORIGIN = 0x20030000, LENGTH = 0x10000
+    }

@@ -1,0 +1,20 @@
+/*
+ * Copyright (c) 2024 DNDG srl
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+&uart1 {
+
+	status = "okay";
+
+	current-speed = <115200>;
+	pinctrl-0 = <&uart1_tx_pa8 &uart1_rx_pa9>;
+	pinctrl-names = "default";
+
+	modbus0 {
+		de-gpios = <&gpiob 29 GPIO_ACTIVE_HIGH>;
+		compatible = "zephyr,modbus-serial";
+		status = "okay";
+	};
+};

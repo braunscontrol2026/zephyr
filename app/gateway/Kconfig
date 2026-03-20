@@ -1,0 +1,69 @@
+# Copyright (c) 2019 Peter Bigot Consulting, LLC
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "gateway"
+
+
+config BCBUS_LINE_SIZE
+	int "Size of linebuffer for TTY and FORTH"
+	default 120
+	help
+	  Used for linebuffers.
+
+config APP_HTTP_SERVER_PORT
+        int "HTTP Server Port"
+        default 80
+
+config TFTP_APP_PORT
+	string "TFTP port used"
+	default "69"
+	help
+	  TFTP port used.
+
+config TFTP_APP_SERVER
+	string "TFTP server address"
+	default "10.100.32.103"
+	help
+	  TFTP server address. Write as a full URI including optional port number.
+	  When DNS resolver is enabled, DNS domain names could be used as well.
+
+choice
+	prompt "Storage backend type used by the application"
+	default APP_LITTLEFS_STORAGE_FLASH
+	help
+	  Specify the type of storage backend.
+
+config APP_LITTLEFS_STORAGE_FLASH
+	bool "Use flash memory backend"
+
+endchoice
+
+
+menuconfig QSPI
+	bool "Quad Serial Peripheral Interface (QSPI) bus drivers"
+	help
+	  Enable support for the QSPI hardware bus.
+
+if QSPI
+
+config QSPI_INIT_PRIORITY
+	int "Init priority"
+	default KERNEL_INIT_PRIORITY_DEVICE
+	help
+	  Device driver initialization priority.
+
+config QSPI_SAM0
+	bool "Atmel SAM0 series QSPI driver"
+	default y
+	depends on DT_HAS_ATMEL_SAM0_QSPI_ENABLED
+	select PINCTRL
+	help
+	  Enable support for the SAM0 QSPI driver.
+
+module = QSPI
+module-str = qspi
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # QSPI
+
+source "Kconfig.zephyr"

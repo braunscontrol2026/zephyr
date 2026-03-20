@@ -1,0 +1,87 @@
+# Copyright (c) 2020 PHYTEC Messtechnik GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig BCBUS
+	bool "Bcbus support"
+	select CRC
+
+if BCBUS
+
+config BCBUS_BUFFER_SIZE
+	int "Bcbus buffer size"
+	default 64
+	range 16 256
+	help
+	  Bcbus buffer size.
+
+choice
+	prompt "Supported node roles"
+	default BCBUS_ROLE_CLIENT_SERVER
+	help
+	  Specify the type of supported node roles.
+
+config BCBUS_ROLE_CLIENT
+	bool "Client support"
+
+config BCBUS_ROLE_SERVER
+	bool "Server support"
+
+config BCBUS_ROLE_CLIENT_SERVER
+	bool "Client and server support"
+
+endchoice
+
+config BCBUS_SERVER
+	bool
+	default y if BCBUS_ROLE_SERVER || BCBUS_ROLE_CLIENT_SERVER
+
+config BCBUS_CLIENT
+	bool
+	default y if BCBUS_ROLE_CLIENT || BCBUS_ROLE_CLIENT_SERVER
+
+config BCBUS_SERIAL
+	bool "Bcbus over serial line support"
+	default y
+	depends on SERIAL && SERIAL_HAS_DRIVER
+	depends on DT_HAS_ZEPHYR_BCBUS_SERIAL_ENABLED
+	imply UART_USE_RUNTIME_CONFIGURE
+	help
+	  Enable Bcbus over serial line support.
+
+config BCBUS_ASCII_MODE
+	depends on BCBUS_SERIAL
+	bool "Bcbus transmission mode ASCII"
+	help
+	  Enable ASCII transmission mode.
+
+config BCBUS_RAW_ADU
+	bool "Bcbus raw ADU support"
+	help
+	  Enable Bcbus raw ADU support.
+
+config BCBUS_NUMOF_RAW_ADU
+	int "Number of raw ADU instances"
+	depends on BCBUS_RAW_ADU
+	range 1 4
+	help
+	  Number of raw ADU instances.
+
+config BCBUS_FP_EXTENSIONS
+	bool "Floating-Point extensions"
+	default y
+	help
+	  Enable Floating-Point extensions
+
+config BCBUS_FC08_DIAGNOSTIC
+	bool "FC08 Diagnostic support"
+	depends on BCBUS_SERVER
+	default y
+	help
+	  Enable function code 08 Diagnostic support
+
+module = BCBUS
+module-str = Bcbus Support
+module-help = Sets log level for Bcbus support
+source "subsys/logging/Kconfig.template.log_config"
+
+endif

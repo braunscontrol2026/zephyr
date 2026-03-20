@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2020 Phytec Messtechnik GmbH
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* 			clocks = <&mclk 0x10 21>, <&mclk 0x10 13>, <&mclk 0x1c 13>;
+*/
+
+/ {
+	soc {
+		qspi0: qspi@42003400 {
+			compatible = "bc,sam0-qspiram";
+			reg = <0x42003400 0x400>;
+			interrupts = <134 0>;
+			clocks = <&mclk 0x1c 13>;
+			clock-names ="MCLK";
+			atmel,assigned-clocks = <&gclk 0x0>;
+			atmel,assigned-clock-names = "GCLK";
+			status = "disabled";
+		};
+	};
+};
+
+&sercom2 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <19200>;
+	rxpo = <1>;
+	txpo = <0>;
+
+	pinctrl-0 = <&sercom2_uart_default>;
+	pinctrl-names = "default";
+
+	bcbus0 {
+		compatible = "zephyr,bcbus-serial";
+		status = "okay";
+		de-gpios = <&portb 28 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&sercom3 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <19200>;
+	rxpo = <1>;
+	txpo = <0>;
+
+	pinctrl-0 = <&sercom3_uart_default>;
+	pinctrl-names = "default";
+
+	bcbus1 {
+		compatible = "zephyr,bcbus-serial";
+		status = "okay";
+		de-gpios = <&porta 20 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&sercom1 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <19200>;
+	rxpo = <1>;
+	txpo = <0>;
+
+	pinctrl-0 = <&sercom1_uart_default>;
+	pinctrl-names = "default";
+
+	bcbus2 {
+		compatible = "zephyr,bcbus-serial";
+		status = "okay";
+		de-gpios = <&portd 20 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&sercom5 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <19200>;
+	rxpo = <1>;
+	txpo = <0>;
+
+	pinctrl-0 = <&sercom5_uart_default>;
+	pinctrl-names = "default";
+
+	bcbus3 {
+		compatible = "zephyr,bcbus-serial";
+		status = "okay";
+		de-gpios = <&portb 18 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&wdog {
+	status = "okay";
+};
+
+&sram0 {
+	reg = <0x20000000 0x3c000>;
+};
+
+
+&qspi0 {
+		pinctrl-0 = < &qspi_default >;
+		pinctrl-names = "default";
+		frequency = < 66000000 >;
+		disk-start = < 0x40000000 >;
+		status = "okay";
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			rampart0: partition@100000 {
+			reg = <0x00100000 (DT_SIZE_M(7))>;
+		};
+	};
+
+		ramdisk0 {
+			compatible = "zephyr,flash-disk";
+			partition = <&rampart0>;
+			disk-name = "RAM";
+			sector-size = < 512 >;
+			cache-size = <512>;
+			status = "okay";
+		};
+};
+
+/ {
+	aliases {
+		mac-eeprom = &eeprom0;
+	};
+
+	eeprom0: eeprom-0 {
+		compatible = "zephyr,emu-eeprom";
+		status = "okay";
+		partition = < &chip_partition >;
+		size = <64>;
+		pagesize = <(16*512)>;
+	};
+
+};
+
+/ {
+   chosen {
+      zephyr,code-partition = &slot0_partition;
+   };
+};

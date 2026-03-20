@@ -1,0 +1,122 @@
+/*
+ * Copyright (c) 2022, Gerson Fernando Budke <nandojve@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <dt-bindings/pinctrl/same54p-pinctrl.h>
+
+&pinctrl {
+	qspi_default: qspi_default {
+		group1 {
+			pinmux = <PA8H_QSPI_DATA0>,
+				 <PA9H_QSPI_DATA1>,
+				 <PA10H_QSPI_DATA2>,
+				 <PA11H_QSPI_DATA3>,
+				 <PB10H_QSPI_SCK>,
+				 <PB11H_QSPI_CS>;
+		};
+	};
+
+	led_pwm_default: led_pwm_default {
+		group1 {
+			pinmux = <PA21G_TCC0_WO1>,
+				 <PA22G_TCC0_WO2>,
+				 <PA23G_TCC0_WO3>;
+		};
+	};
+
+	gmac_rmii: gmac_rmii {
+		group1 {
+			pinmux = <PA14L_GMAC_GTXCK>,
+				 <PA17L_GMAC_GTXEN>,
+				 <PA18L_GMAC_GTX0>,
+				 <PA19L_GMAC_GTX1>,
+				 <PC20L_GMAC_GRXDV>,
+				 <PA13L_GMAC_GRX0>,
+				 <PA12L_GMAC_GRX1>,
+				 <PA15L_GMAC_GRXER>;
+		};
+	};
+
+	mdio_default: mdio_default {
+		group1 {
+			pinmux = <PC11L_GMAC_GMDC>,
+				 <PC12L_GMAC_GMDIO>;
+		};
+	};
+
+	sercom4_spi_default: sercom4_spi_default {
+		group1 {
+			pinmux = <PB13C_SERCOM4_PAD1>,
+				 <PB12C_SERCOM4_PAD0>,
+				 <PB15C_SERCOM4_PAD3>;
+		};
+	};
+
+	sercom0_uart_default: sercom0_uart_default {
+		group1 {
+			pinmux = <PA4D_SERCOM0_PAD0>,
+				 <PA5D_SERCOM0_PAD1>;
+		};
+	};
+
+	sercom1_uart_default: sercom1_uart_default {
+		group1 {
+			pinmux = <PC22C_SERCOM1_PAD0>,
+				 <PC23C_SERCOM1_PAD1>;		};
+	};
+
+	sercom1_rs485_default: sercom1_rs485_default {
+		group1 {
+			pinmux = <PC22C_SERCOM1_PAD0>,
+				 <PC23C_SERCOM1_PAD1>,
+				 <PD20C_SERCOM1_PAD2>;
+		};
+	};
+
+	sercom2_uart_default: sercom2_uart_default {
+		group1 {
+			pinmux = <PB26C_SERCOM2_PAD0>,
+				 <PB27C_SERCOM2_PAD1>;
+		};
+	};
+
+	sercom2_rs485_default: sercom2_rs485_default {
+		group1 {
+			pinmux = <PB26C_SERCOM2_PAD0>,
+				 <PB27C_SERCOM2_PAD1>,
+				 <PB28C_SERCOM2_PAD2>;
+		};
+	};
+
+	sercom3_uart_default: sercom3_uart_default {
+		group1 {
+			pinmux = <PB20C_SERCOM3_PAD0>,
+				 <PB21C_SERCOM3_PAD1>;
+		};
+	};
+
+	sercom3_rs485_default: sercom3_rs485_default {
+		group1 {
+			pinmux = <PB20C_SERCOM3_PAD0>,
+				 <PB21C_SERCOM3_PAD1>,
+				 <PA20D_SERCOM3_PAD2>;
+		};
+	};
+
+	sercom5_uart_default: sercom5_uart_default {
+		group1 {
+			pinmux = <PB16C_SERCOM5_PAD0>,
+				 <PB17C_SERCOM5_PAD1>;
+		};
+	};
+
+	sercom5_rs485_default: sercom5_rs485_default {
+		group1 {
+			pinmux = <PB16C_SERCOM5_PAD0>,
+				 <PB17C_SERCOM5_PAD1>,
+				 <PB18C_SERCOM5_PAD2>;
+		};
+	};
+
+};

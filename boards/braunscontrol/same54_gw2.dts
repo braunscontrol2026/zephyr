@@ -1,0 +1,223 @@
+/*
+ * Copyright (c) 2019 Benjamin Valentin
+ # Copyright (c) 2024-2025 Gerson Fernando Budke <nandojve@gmail.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+#include <atmel/same5xx20.dtsi>
+#include "same54_gw2-pinctrl.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/ {
+	model = "SAM E54 Gateway";
+	compatible = "same54,gw2", "atmel,same54p20a", "atmel,same54";
+
+	aliases {
+		led0 = &led0;
+		pwm-led0 = &pwm_led0;
+		led1 = &led1;
+		pwm-led1 = &pwm_led1;
+		led2 = &led2;
+		pwm-led2 = &pwm_led2;
+		red-pwm-led = &pwm_led0;
+		green-pwm-led = &pwm_led1;
+		blue-pwm-led = &pwm_led2;
+		spi1 = &sercom4;
+	};
+
+	chosen {
+		zephyr,code-partition = &slot0_partition;
+		zephyr,console = &sercom0;
+		zephyr,shell-uart = &sercom0;
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led_0 {
+			gpios = <&porta 21 GPIO_ACTIVE_LOW>;
+			label = "Red LED";
+		};
+		led1: led_1 {
+			gpios = <&porta 22 GPIO_ACTIVE_LOW>;
+			label = "Green LED";
+		};
+		led2: led_2 {
+			gpios = <&porta 23 GPIO_ACTIVE_LOW>;
+			label = "Blue LED";
+		};
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+		pwm_led0: pwm_led_0 {
+			pwms = <&tcc0 0 PWM_MSEC(20)>;
+			label = "Red LED PWM";
+		};
+		pwm_led1: pwm_led_1 {
+			pwms = <&tcc0 1 PWM_MSEC(20)>;
+			label = "Green LED PWM";
+		};
+		pwm_led2: pwm_led_2 {
+			pwms = <&tcc0 2 PWM_MSEC(20)>;
+			label = "Blue LED PWM";
+		};
+	};
+};
+
+
+&cpu0 {
+	clock-frequency = <120000000>;
+};
+
+&tcc0 {
+	status = "okay";
+	compatible = "atmel,sam0-tcc-pwm";
+	/* Gives a maximum period of 1.1s for 120MHz main clock */
+	prescaler = <8>;
+	channels = <4>;
+	#pwm-cells = <2>;
+
+	pinctrl-0 = <&led_pwm_default>;
+	pinctrl-names = "default";
+};
+
+&rtc {
+	status = "okay";
+	counter-mode = "clock";
+	prescaler = <1024>;
+
+	atmel,assigned-clocks = <&osc32kctrl 4>;
+};
+
+&sercom0 {
+	status = "okay";
+	compatible = "atmel,sam0-uart";
+	current-speed = <115200>;
+	rxpo = <1>;
+	txpo = <0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	pinctrl-0 = <&sercom0_uart_default>;
+	pinctrl-names = "default";
+};
+
+&sercom4 {
+	status = "okay";
+	compatible = "atmel,sam0-spi";
+	dipo = <3>;
+	dopo = <0>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	pinctrl-0 = <&sercom4_spi_default>;
+	pinctrl-names = "default";
+
+	cs-gpios = <&portb 14 GPIO_ACTIVE_LOW>;
+
+	w25q64_spi: spi-nor-flash@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <24000000>;
+		size = <DT_SIZE_M(64)>; /* 64 Mbits */
+		status = "okay";
+		jedec-id = [ef 70 17];
+		has-dpd;
+		use-fast-read;
+		t-enter-dpd = <3500>;
+		t-exit-dpd = <3500>;
+		erase-block-size = <DT_SIZE_K(4)>;
+		write-block-size = <1>;
+
+	};
+};
+
+
+&gmac {
+	status = "okay";
+
+	pinctrl-0 = <&gmac_rmii>;
+	pinctrl-names = "default";
+
+	phy-handle = <&phy>;
+        // Example of using a random MAC address
+        // zephyr,random-mac-address;
+
+        // Example of setting a specific MAC address (replace with your desired address)
+        // local-mac-address = [de ad be ef 00 11];
+
+	// zephyr,deferred-init;
+};
+
+&mdio {
+	status = "okay";
+
+	pinctrl-0 = <&mdio_default>;
+	pinctrl-names = "default";
+
+	phy: ethernet-phy@0 {
+		compatible = "ethernet-phy";
+		status = "okay";
+		reg = <0>;
+	};
+};
+
+&flash0 {
+	erase-block-size = <DT_SIZE_K(4)>;
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			reg = <0x0 0x00010000>;
+		};
+
+		slot0_partition: partition@10000 {
+			reg = <0x00010000 0x00d0000>;
+		};
+
+		/*
+		 * Forth partition last 128 kB - storage_partition
+		 */
+		forth_partition: partition@e0000 {
+			reg = <0x00e0000 0x0001c000>;
+		};
+
+		 /*
+		 * The final 16 KiB is reserved for the application.
+		 * Storage partition will be used by FCB/LittleFS/NVS
+		 * if enabled.
+		 */
+		chip_partition: partition@fc000 {
+			label = "eeprom";
+			reg = <0x000fc000 0x00004000>;
+		};
+	};
+};
+
+
+&w25q64_spi {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		storage_partition: partition@10000 {
+			reg = <0x00010000 (DT_SIZE_M(7) + 0x020000 - DT_SIZE_K(64))>;
+		};
+
+		scratch_partition: partition@720000 {
+			reg = <0x000720000 0x00010000>;
+		};
+
+		slot1_partition: partition@730000 {
+			reg = <0x000730000 0x00d0000>;
+		};
+
+	};
+};

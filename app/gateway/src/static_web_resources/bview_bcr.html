@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html><body>
+<table class="fixed" border="0">
+	<col width="500px" />
+	<tr>
+		<td>
+			<h2>BC Busstatus</h2>
+			<table border="0">
+				<tr>
+					<td><input type="checkbox" id="refresh"
+							name="refresh" value="yes" checked> Refresh
+					</label></td>
+				</tr>
+			<table id="wrap" border="0"></table>
+		</td>
+	</tr>
+</table>
+<script>
+
+	setInterval(refreshLCD, 250);
+	
+	upStreamDataObj = {clientData:{scancode:0, type:"test"}};
+
+    create_table();
+
+	function create_table() {
+		var table = "";
+		for (let i = 0; i < 16; i++) {
+			table += "<tr>";
+			for (let j = 0; j < 16; j++) {
+				let k = i*16 + j;
+				table += `<td id=\"BA${k}\" align=center onclick="set_ba(${k})">${k}</td>`;
+			}
+			table += "</tr>";
+		}
+		document.getElementById("wrap").innerHTML = table;
+	}
+	
+	function send_tast(scode) {
+		upStreamDataObj.clientData.scancode = scode;
+		console.log(upStreamDataObj);
+	}
+
+	function set_ba(scode) {
+		upStreamDataObj.clientData.ba = scode;
+		console.log(upStreamDataObj);
+	}
+
+	function send_updata() {
+		let s = JSON.stringify(upStreamDataObj);
+		upStreamDataObj.clientData.scancode = 0;
+		return s;
+	}
+
+	function loadJSON(url, cFunction) {
+		const xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+			if (upStreamDataObj.clientData.hasOwnProperty("ba")) {
+				delete upStreamDataObj.clientData.ba;
+				location.href = "fernb";
+				}
+			}
+		};
+		url = url + "?data=" + send_updata();
+		xhttp.onload = function() {
+			cFunction(this);
+		}
+		xhttp.open("GET", url, true);
+		xhttp.setRequestHeader("Content-Type", "application/json");
+		xhttp.send();
+	}
+
+	function getJSON(xhttp) {
+		if (xhttp.readyState === 4 && xhttp.status === 200) {
+			const obj = JSON.parse(xhttp.responseText);
+			//			document.getElementById("line1").innerHTML = obj.client.line1;
+			//			document.getElementById("line2").innerHTML = obj.client.line2;
+			let startba = obj.startba;
+			for (let i = 0; i < 16; i++) {
+				let j = startba+i;
+				let unit = obj.segment[i];
+				let ids = `BA${j}`;
+				const snArray = unit.snr.split(" ");
+				// parseInt(snArray[0], 16);
+				// document.getElementById(ids).innerHTML = unit.snr;
+				if (unit.errcount == 0) {
+					if (parseInt(snArray[0], 16) != 0) {
+						document.getElementById(ids).style.color = "black";
+						document.getElementById(ids).style.backgroundColor = "lime";
+					}
+					else {
+						document.getElementById(ids).style.color = "grey";
+						document.getElementById(ids).style.backgroundColor = "white";
+					}
+				} 
+				else {
+					if (parseInt(snArray[0], 16) != 0) {
+						document.getElementById(ids).style.color = "red";
+						document.getElementById(ids).style.backgroundColor = "yellow";
+					}
+					else {
+						document.getElementById(ids).style.color = "red";
+						document.getElementById(ids).style.backgroundColor = "white";
+					}
+				}
+			}
+		}
+	}
+
+	function refreshLCD() {
+		const cb = document.querySelector('#refresh');
+		if (cb.checked) {
+			loadJSON("bview.json", getJSON);
+		}
+	}
+</script>
+</body></html>
